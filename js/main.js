@@ -175,31 +175,143 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('scroll', animateStats);
     animateStats(); // Check on load
 
-    // ==================== PORTFOLIO FILTER ====================
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const portfolioCards = document.querySelectorAll('.portfolio-card');
+   // ==================== PORTFOLIO FILTER ====================
+const filterBtns = document.querySelectorAll('.filter-btn');
+const portfolioCards = document.querySelectorAll('.portfolio-card');
 
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Update active button
-            filterBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
 
-            const filter = btn.getAttribute('data-filter');
+        const filter = btn.getAttribute('data-filter');
 
-            portfolioCards.forEach(card => {
-                const category = card.getAttribute('data-category');
-                
-                if (filter === 'all' || category === filter) {
-                    card.style.display = 'block';
-                    card.style.animation = 'fadeInUp 0.5s ease forwards';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+        portfolioCards.forEach(card => {
+            const category = card.getAttribute('data-category');
+            
+            if (filter === 'all' || category === filter) {
+                card.style.display = 'block';
+                card.style.animation = 'fadeInUp 0.5s ease forwards';
+            } else {
+                card.style.display = 'none';
+            }
         });
     });
+});
 
+// ==================== PORTFOLIO MODAL ====================
+const portfolioModal = document.getElementById('portfolioModal');
+const modalOverlay = document.getElementById('modalOverlay');
+const modalClose = document.getElementById('modalClose');
+const modalImage = document.getElementById('modalImage');
+const modalTitle = document.getElementById('modalTitle');
+const modalSubtitle = document.getElementById('modalSubtitle');
+const modalDescription = document.getElementById('modalDescription');
+const modalTech = document.getElementById('modalTech');
+const modalThumbs = document.getElementById('modalThumbs');
+const modalCounter = document.getElementById('modalCounter');
+const modalPrev = document.getElementById('modalPrev');
+const modalNext = document.getElementById('modalNext');
+
+let currentImages = [];
+let currentImageIndex = 0;
+
+// Open modal when project card is clicked
+portfolioCards.forEach(card => {
+    card.addEventListener('click', () => {
+        openProjectModal(card);
+    });
+});
+
+function openProjectModal(card) {
+    const title = card.getAttribute('data-title');
+    const subtitle = card.getAttribute('data-subtitle');
+    const description = card.getAttribute('data-description');
+    const tech = card.getAttribute('data-tech').split(',').map(t => t.trim());
+    const images = card.getAttribute('data-images').split(',').map(i => i.trim());
+
+    // Set modal content
+    modalTitle.textContent = title;
+    modalSubtitle.textContent = subtitle;
+    modalDescription.textContent = description;
+    
+    // Set tech tags
+    modalTech.innerHTML = '';
+    tech.forEach(t => {
+        const span = document.createElement('span');
+        span.textContent = t;
+        modalTech.appendChild(span);
+    });
+
+    // Set images
+    currentImages = images;
+    currentImageIndex = 0;
+    updateModalImage();
+    
+    // Build thumbnails
+    modalThumbs.innerHTML = '';
+    images.forEach((img, index) => {
+        const thumb = document.createElement('div');
+        thumb.classList.add('modal-thumb');
+        if (index === 0) thumb.classList.add('active');
+        thumb.innerHTML = `<img src="${img}" alt="Thumbnail ${index + 1}" onerror="this.parentElement.style.background='linear-gradient(135deg, #FF6B00, #FF9A44)';">`;
+        thumb.addEventListener('click', () => {
+            currentImageIndex = index;
+            updateModalImage();
+        });
+        modalThumbs.appendChild(thumb);
+    });
+
+    // Show modal
+    portfolioModal.classList.add('active');
+    document.body.classList.add('modal-open');
+}
+
+function updateModalImage() {
+    modalImage.classList.add('loading');
+    setTimeout(() => {
+        modalImage.src = currentImages[currentImageIndex];
+        modalImage.onerror = () => {
+            modalImage.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"%3E%3Crect fill="%23FF6B00" width="800" height="600"/%3E%3Ctext x="50%25" y="50%25" font-family="Arial" font-size="40" fill="white" text-anchor="middle" dominant-baseline="middle"%3EProject Screenshot%3C/text%3E%3C/svg%3E';
+        };
+        modalImage.classList.remove('loading');
+        modalCounter.textContent = `${currentImageIndex + 1} / ${currentImages.length}`;
+        
+        // Update active thumbnail
+        const thumbs = modalThumbs.querySelectorAll('.modal-thumb');
+        thumbs.forEach((t, i) => {
+            t.classList.toggle('active', i === currentImageIndex);
+        });
+    }, 150);
+}
+
+function closeModal() {
+    portfolioModal.classList.remove('active');
+    document.body.classList.remove('modal-open');
+}
+
+// Modal controls
+modalClose.addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', closeModal);
+
+modalPrev.addEventListener('click', () => {
+    currentImageIndex = currentImageIndex === 0 ? currentImages.length - 1 : currentImageIndex - 1;
+    updateModalImage();
+});
+
+modalNext.addEventListener('click', () => {
+    currentImageIndex = currentImageIndex === currentImages.length - 1 ? 0 : currentImageIndex + 1;
+    updateModalImage();
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+    if (!portfolioModal.classList.contains('active')) return;
+    
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'ArrowLeft') modalPrev.click();
+    if (e.key === 'ArrowRight') modalNext.click();
+});
     // ==================== TESTIMONIALS SLIDER ====================
     const track = document.getElementById('testimonialTrack');
     const prevBtn = document.getElementById('prevTestimonial');
