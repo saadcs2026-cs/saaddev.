@@ -691,23 +691,30 @@ input, textarea, select {
     font-family: var(--font-heading);
     font-size: clamp(2.5rem, 6vw, 4.5rem);
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1.15;
     margin-bottom: 24px;
     letter-spacing: -0.02em;
+    color: var(--white);
 }
 
-.hero-title-gradient {
-    background: linear-gradient(135deg, var(--primary), var(--primary-lighter));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.hero-title-highlight {
+    color: var(--primary);
+    position: relative;
+    display: inline-block;
 }
 
-.hero-title-outline {
-    -webkit-text-stroke: 2px var(--primary);
-    -webkit-text-fill-color: transparent;
+.hero-title-highlight::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: var(--primary);
+    opacity: 0.2;
+    border-radius: 4px;
+    z-index: -1;
 }
-
 .hero-subtitle {
     font-size: 1.15rem;
     color: var(--text-secondary);
